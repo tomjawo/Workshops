@@ -1,0 +1,30 @@
+﻿apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-hog
+  labels:
+    app: nginx-hog
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      resources:
+        limits:
+          memory: "200Mi"
+        requests:
+          memory: "10Mi"
+      ports:
+        - containerPort: 80
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          echo "Starting Nginx..."
+          nginx &
+          MEMORY_HOG=""
+          sleep 15
+          for i in $(seq 1 200)
+          do
+            MEMORY_HOG="$MEMORY_HOG$(head -c 10M < /dev/zero | tr '\0' 'a')"
+            sleep 5
+          done
+          tail -f /dev/null
